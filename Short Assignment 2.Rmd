@@ -1,0 +1,121 @@
+---
+title: "Short Assignment 2"
+description: |
+  A new article created using the Distill format.
+author:
+  - name: Yifan Li 
+    url: 
+    affiliation: Department of Sociology, UMass Amherst
+    affiliation_url: 
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load a built-in dataset from igraph.
+
+```{r}
+#Load the data.
+library(igraphdata)
+data("enron",package="igraphdata")
+ls()
+```
+This is an Enron email dataset has been made public by the U.S. Department of Justice. Let's look at some of its basic descriptive statistics.
+
+```{r}
+library(igraph)
+#Basic descriptive facts.
+#Network size
+vcount(enron)
+ecount(enron)
+(ecount(enron) / vcount(enron))
+(ecount(enron) / (vcount(enron) * (vcount(enron) - 1)))
+
+#Find network features: 
+is_bipartite(enron)
+is_directed(enron)
+is_weighted(enron)
+
+#display vertex attributes
+vertex_attr_names(enron)
+
+#display edge attributes
+edge_attr_names(enron)
+
+#summarize numeric network attribute
+head(V(enron)$Email)
+head(V(enron)$Name)
+head(V(enron)$Note)
+head(E(enron)$Time)
+head(E(enron)$Reciptype)
+head(E(enron)$Topic)
+head(E(enron)$LDC_topic)
+
+summary(E(enron)$Topic)
+summary(E(enron)$LDC_Topic)
+```
+This network has 184 nodes and 125409 edges. It is a non-bipartite, directed and unweighted network. Each node is a employee of Enron. The edge represents the email communication from one person to the other one. (Noticing it's directed. So it is "from...to..." rather than "between".) Each employee sent 681.57 messages on average, and averagely sent 3.72 messages to each potential receiver (collegue).
+
+Every node has three attributes, which are Email, Name and Note. "Email" is the email address (omitting the domain name) of the person. "Name" is just the real name. "Note" is mainly about position and department.
+
+ Each edge has four attributes, which are Time, Reciptype, Topic, and LDC-topic. "Time" is a string telling the when the email was sent. To make further analysis, we need to transfer the string to some kind of numeric data (which we haven't learnt.) The "Reciptype" is how the recipient receive the email, 'to','cc' or 'bcc'.
+ 
+ (Not sure about what Topic nad LDC_topic is about. Maybe categories assigned by the publisher describing types of topics.)
+
+
+```{r}
+#Classify all dyads in the network:
+igraph::dyad.census(enron)
+```
+
+There are 30600 mutual dyads, and 64208 asymmetric dyads. (Didn't understand what negative 77972 means.)
+
+
+
+```{r}
+#Classify all triads in the network:
+igraph::triad_census(enron)
+sum(igraph::triad_census(enron))
+(700234 / 1021384)
+((19530 + 249694) / 1021384)
+
+#get global clustering coefficient(i.e. network transitivity):
+transitivity(enron, type="global")
+
+##get average local clustering coefficient:
+transitivity(enron, type="average")
+
+#find average shortest path for network
+average.path.length(enron,directed=F)
+```
+
+Above shows the census of 16 kinds of triads. Almost 69% triads are empty, and 26% are one egded. This implies a relatively loosely connected network.
+To learn more about the connectivity, let's look at the transitivity. The global clustering coefficient is 0.3723, which means 37% of connected Triplets are closed, which is relatively loose. The average local clustering coefficient is 0.5055. It means on average, if two nodes are connected to a same node (two person respectively have email communication to one person), they have about 51% chance to connect to each other (communicate via email with each other.) 
+
+The local clustering coefficient is much larger than the global one, implying the network is clustering around, or concentrate to, some focus node. In other word, alters of employees who have few email communication are less likely to connect to each other than alters of employees with many other connections.(Not sure whether I understand it right. The Tuesday lecure recording link is wrong so I couldn't watch it.)
+
+The average geodesic distance is 2. It means onaverage, one need only one other person to have email connection to a random person in the network.
+
+```{r}
+#Number of components
+igraph::components(enron)$no 
+
+#Size of each component
+igraph::components(enron)$csize
+```
+
+There are only 3 components in the network. 182 of the nodes are in the major componets, while there are two isolates.
+
+
+
+
+
+
+
+
+
+
+
